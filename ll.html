@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-beta/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css">
+    <link rel="stylesheet" href="src/leaflet-search.css" />
+    <link rel="stylesheet" href="css/style.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css">
+
+
+
+    <style>
+    .search-input {
+        font-family:Courier
+      }
+      .search-input,
+      .leaflet-control-search {
+        max-width:400px;
+      }
+
+     .map_holder{
+        position: relative;
+        width: 100%;
+        height: 600px;
+      }
+
+      #map{
+          height: 700px;
+          width: 100%;
+          float: left;
+          z-index: 1;
+          position: relative;
+      }
+
+    .map-legend{
+      display: none;
+    }
+
+      .overlay {
+        height: 90px;
+        width: 100%;
+        position: absolute;
+        font-size: 3em;
+        text-align: center;
+        z-index: 2000;
+        background-color: rgba(255, 250, 245, 0.5);
+        top: 0px;
+        right: 50px;
+        left: 50px;
+
+        color: white;
+        text-shadow: 2px 2px 4px #000000;
+      }
+
+      ::selection {
+        color: #e1e1e1;
+        background: #e3e0d7; /* WebKit/Blink Browsers */
+      }
+      ::-moz-selection {
+        color: #e1e1e1;
+        background: #e3e0d7; /* Gecko Browsers */
+      }
+
+    </style>
+
+</head>
+<body>
+
+
+  <div class="map_holder">
+    <div id="map"></div>
+    <div class="overlay" id="overlay" onclick="copyValue()" style="cursor:pointer"> 
+    </div>
+  </div>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.3.4/vue.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
+
+    <script src="src/leaflet-search.js"></script>
+
+    <script>
+
+      var message="";
+      // We’ll add a tile layer to add to our map, in this case it’s a OSM tile layer.
+      // Creating a tile layer usually involves setting the URL template for the tile images
+      var osmUrl = 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+          osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+
+      osm = L.tileLayer(osmUrl, {
+        maxZoom: 18,
+        attribution: osmAttrib
+      });
+
+
+      // initialize the map on the "map" div with a given center and zoom
+      var map = L.map('map').setView([34.01624, -118.03711], 8).addLayer(osm);
+
+
+      var theMarker;
+      var theCircle;
+      var do_not_mark = false;
+
+
+     map.addControl( new L.Control.Search({
+          url: 'https://nominatim.openstreetmap.org/search?format=json&q={s}',
+          jsonpParam: 'json_callback',
+          propertyName: 'display_name',
+          propertyLoc: ['lat','lon'],
+          marker: L.marker([0,0]),
+          autoCollapse: false,
+          autoType: true,
+          firstTipSubmit: true,
+          collapsed: false,
+          minLength: 2,
+          zoom: 7
+        })
+       .on('search:locationfound', function(e) {
+          console.log(e);
+          message = `${e.latlng.lat} ${e.latlng.lng}`;
+          document.getElementsByClassName('map-legend')[0].innerHTML = `<input onClick='copyValue()' type='button' id='button' value='${message}'>`;
+          document.getElementById('overlay').innerHTML = message;
+
+       })
+     
+     );
+
+     // FeatureGroup is to store editable layers
+     var drawnItems = new L.FeatureGroup();   // editableLayers
+     map.addLayer(drawnItems);
+
+
+    var circleList = [];
+    drawnItems.eachLayer( function (l) {
+        if (l instanceof L.Circle) {
+            circleList.push(l);
+        }
+    });
+
+
+
+    var drawControlFull = new L.Control.Draw({
+        edit: {
+            featureGroup: drawnItems
+        },
+             draw: {
+                 polygon: false,
+                 polyline: false,
+                 rectangle: false,
+                 marker: false,
+                 circlemarker: false
+             },
+    });
+
+
+    var drawControlEditOnly = new L.Control.Draw({
+        edit: {
+            featureGroup: drawnItems
+        },
+        draw: false
+    });
+
+    map.addControl(drawControlFull);
+
+
+
+
+
+    map.on("draw:created", function (e) {
+        console.log('in draw:created');
+        console.log(do_not_mark);
+        //do_not_mark = true;
+        console.log(do_not_mark);
+        var layer = e.layer;
+        var type = e.layerType;
+
+        if (type === 'circle') {
+
+          theCircle = e.layer;
+
+
+            var theCenterPt = layer.getLatLng();
+
+            var center = [theCenterPt.lng,theCenterPt.lat]; 
+            console.log(center);
+
+            var theRadius = layer.getRadius();
+            console.log('theRadius' + theRadius);
+
+            theRadius = (theRadius.toFixed(0)/1000).toFixed(0);
+            var lng = theCenterPt.lng.toFixed(8);
+            var lat = theCenterPt.lat.toFixed(8);
+
+
+          message = `${lat} ${lng} ${theRadius}`;
+          document.getElementsByClassName('map-legend')[0].innerHTML = `<input onClick='copyValue()' type='button' id='button' value='${message}'>`;
+          document.getElementById('overlay').innerHTML = message;
+          //document.querySelector("#button [type=submit]").value = "click here";
+          //  document.getElementsByClassName('map-legend')[0].value = `${lat} ${lng} ${theRadius}`;
+
+
+            layer.addTo(drawnItems);
+            
+            drawnItems.addLayer(layer);
+            console.log('draw:created->');
+            console.log(JSON.stringify(layer.toGeoJSON()));
+
+            drawControlFull.remove(map);
+            drawControlEditOnly.addTo(map);
+
+            //do_not_mark = false;
+        }
+
+    //theCircle.editing.enable();
+    
+    });
+
+    map.on("draw:deleted", function(e) {
+        drawControlEditOnly.remove(map);
+        drawControlFull.addTo(map);
+    });
+
+
+  new L.Draw.Circle(map, drawControlFull.options.circle).enable();
+
+
+    var Legend = L.Control.extend({  
+      options: {
+        position: 'topleft'
+      },
+
+      onAdd: function (map) {
+        var legend = L.DomUtil.create('div', 'map-legend', L.DomUtil.get('map'));
+
+        legend.innerHTML="<input onClick='copyValue()' id=button type=button >";
+        console.log(legend);
+        return legend;
+      }
+    });
+
+
+
+    map.addControl(new Legend());
+
+
+   // map.on('click', function(e) {
+   //   console.log('in click');
+   //   console.log(e.latlng);
+   //   console.log(do_not_mark);
+
+   //   if (theMarker) {
+   //     console.log('theMarker is not null');
+   //     map.removeLayer(theMarker);
+   //   }
+   //   
+   //   theMarker = L.marker(e.latlng).addTo(map);
+
+   // });
+
+
+
+     map.on('draw:edited', function (e) {
+       //do_not_mark = true;
+       console.log('in edited ' + e.layers);
+       console.log(do_not_mark);
+
+      L.drawLocal.draw.handlers.circle.radius = 'Radius: ';
+       console.log(e.layers);
+       e.layers.eachLayer(function(l) {
+            theRadius = (l.getRadius().toFixed(0)/1000).toFixed(0);
+            console.log('draw:edited->');
+            //drawnItems.addLayer(layer);
+            console.log('new latlong');
+            var lng = l.toGeoJSON().geometry.coordinates[0].toFixed(8);
+            var lat = l.toGeoJSON().geometry.coordinates[1].toFixed(8);
+            console.log(JSON.stringify(l.toGeoJSON()));
+
+            message = `${lat} ${lng} ${theRadius}`;
+
+            //document.getElementsByClassName('map-legend')[0].innerHTML = `<input onClick='copyValue()' id=button type='button' value='${lat} ${lng} ${theRadius}'>`;
+            document.getElementsByClassName('map-legend')[0].innerHTML = `<input onClick='copyValue()' id=button type='button' value='${message}'>`;
+          document.getElementById('overlay').innerHTML = message;
+
+           //do_not_mark = false;
+
+       });
+
+});
+
+
+     map.flyTo([48.3416461723746,11.513671875000002],6);
+
+
+
+function copyValue() {
+
+            var range = document.createRange();
+             range.selectNode(document.getElementById("overlay"));
+             window.getSelection().removeAllRanges();
+             window.getSelection().addRange(range);
+             document.execCommand("copy")
+
+}
+
+
+    </script>
+
+
+</body>
+</html>
