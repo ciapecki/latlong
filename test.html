@@ -1,0 +1,43 @@
+<html>
+  <head>
+  </head>
+  <body>
+<div class="modal-content">
+    <span class="close">×</span>
+    <font size="2"><b> Enter Geo Filter Details</b></font>
+    <table>
+    <tbody><tr><td><table cellspacing="20">
+    	<tbody><tr><td><font size="2">	<b> Latitude </b>	</font></td><td><input type="text" id="latitude" name="latitude" placeholder="E.g. 37.53090">	</td></tr><tr><td><font size="2"> <b>	Longitude </b></font>	</td><td><input type="text" id="longitude" name="longitude" placeholder="E.g. -122.263405">	</td></tr><tr><td><font size="2">	<b>	Radius </b></font>	</td><td><input type="text" id="radius" name="radius" placeholder="E.g. 150">	</td></tr><tr><td></td><td><input type="radio" name="distance" value="Miles" checked="checked"><b>Miles</b>
+      	<input type="radio" name="distance" value="Kilometers"><b>Kilometers</b>
+      	</td></tr></tbody></table></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td><table>
+    	<tbody><tr>
+    	<td>To find your latitude &amp; Longitude points, <a href="https://www.latlong.net/" target="_blank">click here</a></td></tr><tr><td>&nbsp;</td></tr><tr><td>&nbsp;</td></tr><tr><td align="center">	<input type="button" id="geofilter" value="Get Geo Filter" onclick="getGeoFilterRecords()"></td></tr></tbody></table></td></tr></tbody></table></div>
+
+
+
+  <script>
+    function pasteGeoData(e) {
+      var pastedText = undefined;
+
+      if (window.clipboardData && window.clipboardData.getData) { // IE
+        pastedText = window.clipboardData.getData('Text');
+      } else if (e.clipboardData && e.clipboardData.getData) {
+        pastedText = e.clipboardData.getData('text/plain');
+      }
+
+      var parts = pastedText.split(" ");
+
+      document.getElementById("latitude").value = parts[0];
+      document.getElementById("longitude").value = (parts[1] === undefined ? "" : parts[1]);
+      document.getElementById("radius").value = (parts[2] === undefined ? "" : parts[2]);
+
+      return false;
+    }
+    document.getElementById("latitude").onpaste = pasteGeoData;
+
+  </script>
+
+  </body>
+</html>
+
+
