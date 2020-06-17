@@ -186,9 +186,6 @@
     map.addControl(drawControlFull);
 
 
-
-
-
     map.on("draw:created", function (e) {
         console.log('in draw:created');
         console.log(do_not_mark);
@@ -221,6 +218,7 @@
           //document.querySelector("#button [type=submit]").value = "click here";
           //  document.getElementsByClassName('map-legend')[0].value = `${lat} ${lng} ${theRadius}`;
 
+          theCircle.editing.enable();  // make the created circle editable after initial creation
 
             layer.addTo(drawnItems);
             
@@ -309,6 +307,25 @@
        });
 
 });
+
+  map.on(L.Draw.Event.CREATED, function(e) {   
+        var type = e.layerType
+          , layer = e.layer;
+        drawnItems.addLayer(layer);
+        
+        layer.on("edit", function(event) {  // handle event when editable state is on
+            if (type == "circle") {
+
+            var theRadius = (layer.getRadius().toFixed(0)/1000).toFixed(0);
+            var lng = layer.toGeoJSON().geometry.coordinates[0].toFixed(8);
+            var lat = layer.toGeoJSON().geometry.coordinates[1].toFixed(8);
+            message = `${lat} ${lng} ${theRadius}`;
+
+            }
+            layer.bindPopup(message).openPopup();
+            document.getElementById('overlay').innerHTML = message;
+        });
+    });
 
 
      map.flyTo([48.3416461723746,11.513671875000002],6);
