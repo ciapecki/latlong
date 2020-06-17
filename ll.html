@@ -56,6 +56,21 @@
         color: white;
         text-shadow: 2px 2px 4px #000000;
       }
+      
+      #confirmation {
+
+        z-index: 3000;
+        top: 80px;
+        position: absolute;
+        font-size: 4em;
+        left: 35%;
+        margin: auto;
+        width: 40%;
+        padding: 10px;
+
+        color: white;
+        text-shadow: 2px 2px 4px #000000;
+      }
 
       ::selection {
         color: #e1e1e1;
@@ -76,6 +91,7 @@
     <div id="map"></div>
     <div class="overlay" id="overlay" onclick="copyValue()" style="cursor:pointer"> 
     </div>
+    <div id="confirmation"></div>
   </div>
 
 
@@ -305,7 +321,11 @@ function copyValue() {
              range.selectNode(document.getElementById("overlay"));
              window.getSelection().removeAllRanges();
              window.getSelection().addRange(range);
-             document.execCommand("copy")
+             document.execCommand("copy");
+             document.getElementById('confirmation').innerHTML = 'copied to clipboard!!!';
+             let myConfirmation = document.querySelector("#confirmation");
+             myConfirmation.style.border = "3px solid red";
+             myConfirmation.style.color = "red";
 
 }
 
