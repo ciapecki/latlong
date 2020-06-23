@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css">
 
 
-
+    <link rel="stylesheet" href="lib/notifications.css" type="text/css">
     <style>
     .search-input {
         font-family:Courier
@@ -101,6 +101,9 @@
 
 
     <script src="src/leaflet-search.js"></script>
+
+
+    <script src="lib/notifications.js" type="text/javascript"></script>
 
     <script>
 
@@ -334,19 +337,47 @@
 
 function copyValue() {
 
+
+      // Written using ES5 JS for browser support
+          // Form elements
+          var title = "copied to clipboard!!!";
+          var message = "you can paste directly in Endeca"
+          var position = 'nfc-top-right';
+          var duration = 3000;
+          var theme = 'success';
+          var closeOnClick = true;
+          var displayClose = false;
+
+          if(!message) {
+            message = 'You did not enter a message...';
+          }
+
+          window.createNotification({
+            closeOnClick: closeOnClick,
+            displayCloseButton: displayClose,
+            positionClass: position,
+            showDuration: duration,
+            theme: theme
+          })({
+            title: title,
+            message: message
+          });
+
+
             var range = document.createRange();
              range.selectNode(document.getElementById("overlay"));
              window.getSelection().removeAllRanges();
              window.getSelection().addRange(range);
              document.execCommand("copy");
-             document.getElementById('confirmation').innerHTML = 'copied to clipboard!!!';
-             let myConfirmation = document.querySelector("#confirmation");
-             myConfirmation.style.border = "3px solid red";
-             myConfirmation.style.color = "red";
+             //document.getElementById('confirmation').innerHTML = 'copied to clipboard!!!';
+             //let myConfirmation = document.querySelector("#confirmation");
+             //myConfirmation.style.border = "3px solid red";
+             //myConfirmation.style.color = "red";
+
+
+
 
 }
-
-
     </script>
 
 
