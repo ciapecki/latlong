@@ -20,9 +20,22 @@
             padding: 0;
             margin: 0;
         }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+
         html, body, #map {
             height: 100%;
             width: 100%;
+        }
+
+        article {
+            min-height: 100%;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            grid-template-columns: 100%;
         }
 
     .search-input {
@@ -97,6 +110,10 @@
 
 </head>
 <body>
+  <article>
+    <header>
+    </header>
+    <main>
 
 
   <div class="map_holder">
@@ -392,6 +409,10 @@ function copyValue() {
 }
     </script>
 
+    </main>
+    <footer>
+    </footer>
+  </article>
 
 </body>
 </html>
